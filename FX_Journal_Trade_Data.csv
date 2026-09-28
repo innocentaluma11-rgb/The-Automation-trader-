@@ -1,0 +1,89 @@
+Trade_ID,Open_Date,Close_Date,Direction,Symbol,Lot_Size,Entry_Price,Stop_Loss,Take_Profit,Exit_Price,Risk_Points,Reward_Points,Price_Move,R_Multiple,PnL,Outcome,Data_Quality_Flag,Trade_Notes
+TFX-0001,2026-08-19,2026-08-19,SHORT,XAUUSD,0.05,4356.23,4373.23,4367.89,4367.89,17.0,-11.660000000000764,-11.660000000000764,-0.6858823529411763,-58.3,LOSS,INVALID_SHORT_TP,"[19 Aug 2026 - Trade opened
+""LTF (1H) narrows my HTF view
+
+New rule
+Before looking for an entry, write:
+HTF bias: Bullish/Bearish
+HTF invalidation: ______
+HTF target/liquidity: ______
+Then go to 1H., 19 Aug 2026 - TP triggered @ 4367.89
+0.05 lots closed
+0 fees]"
+TFX-0002,2026-08-19,2026-08-19,LONG,XAUUSD,0.05,4368.56,4356.26,4367.44,4357.44,12.300000000000182,-1.1200000000008004,-11.1200000000008,-0.9073170731707182,-55.8,LOSS,INVALID_LONG_TP,"[19 Aug 2026 - Trade opened
+i mistakely close the losing trade with my open position , 19 Aug 2026 - Manual close @ 4357.44
+0.05 lots closed
+0.2 fees
+I mistakely close it with lossing trade ]"
+TFX-0003,2026-08-19,2026-08-19,LONG,XAUUSD,0.05,4367.01,4351.01,4412.17,4412.17,16.0,45.159999999999854,45.159999999999854,2.8225000000000007,225.80000000000004,WIN,OK,"[19 Aug 2026 - Trade opened
+I manually closed it before market fire 😔 2× of collected pips 
+because of LQ zone that excepting price to rebouce my accidental fired upside , 19 Aug 2026 - TP triggered @ 4412.17
+0.05 lots closed
+0 fees]"
+TFX-0004,2026-08-19,2026-08-19,LONG,XAUUSD,0.05,4458.72,4459.26,4459.26,4459.26,-0.5399999999999636,0.5399999999999636,0.5399999999999636,,2.7,WIN,INVALID_LONG_SL|EXIT_EQUALS_SL_BUT_PROFIT,"[19 Aug 2026 - Trade opened
+error that caused this 
+I mistakely touched my sell button while trying to exit in gesture mode 📳, 19 Aug 2026 - TP triggered @ 4459.26
+0.05 lots closed
+0 fees]"
+TFX-0005,2026-08-21,2026-08-21,LONG,XAUUSD,0.05,4523.54,4508.54,4584.54,4584.54,15.0,61.0,61.0,4.066666666666666,305.0,WIN,OK,"[21 Aug 2026 - Trade opened
+htf with ltf direction alignment 
+then bullish sentiment verify my entry logic with my full checklist confirmation before , 21 Aug 2026 - TP triggered @ 4584.54
+0.05 lots closed
+0 fees]"
+TFX-0006,2026-08-20,2026-08-20,LONG,XAUUSD,0.05,4528.85,4522.7,4522.68,4522.68,6.150000000000546,-6.170000000000073,-6.170000000000073,-1.003252032520236,-30.85,LOSS,INVALID_LONG_TP,"[20 Aug 2026 - Trade opened
+htf and ltf direction alignment is correct but minor liquidity grab below takes out my SL , 21 Aug 2026 - TP triggered @ 4522.68
+0.05 lots closed
+0 fees]"
+TFX-0007,2026-08-22,2026-08-22,LONG,XAUUSD,0.05,4523.54,4508.54,4584.54,4584.54,15.0,61.0,61.0,4.066666666666666,305.0,WIN,OK,"[22 Aug 2026 - Trade opened
+market sentiment is bullish using topdown analysis from monthly to 1h timeframe 
+and all aligned so I buy at the pullback , 22 Aug 2026 - TP triggered @ 4584.54
+0.05 lots closed
+0 fees]"
+TFX-0008,2026-08-22,2026-08-22,LONG,XAUUSD,0.05,4623.05,4610.05,4610.05,4610.05,13.0,-13.0,-13.0,-1.0,-65.0,LOSS,INVALID_LONG_TP,"[22 Aug 2026 - Trade opened
+I buy the retracement but it hit SL , 22 Aug 2026 - SL triggered @ 4610.05
+0.05 lots closed
+0 fees]"
+TFX-0009,2026-08-24,2026-08-25,LONG,XAUUSD,0.05,4601.79,4611.17,4634.87,4634.87,-9.38000000000011,33.07999999999993,33.07999999999993,,165.4,WIN,INVALID_LONG_SL,"[24 Aug 2026 - Trade opened
+after my htf view and ltf direction alignment using bullish sentiment of HH and HL , 25 Aug 2026 - TP triggered @ 4634.87
+0.05 lots closed
+0 fees]"
+TFX-0010,2026-08-24,2026-08-25,LONG,XAUUSD,0.05,4645.95,4626.95,4626.05,4626.05,19.0,-19.899999999999636,-19.899999999999636,-1.0473684210526315,-99.5,LOSS,INVALID_LONG_TP,"[24 Aug 2026 - Trade opened
+24 Aug 2026 - Trade opened
+after my htf view and ltf direction alignment using bullish sentiment of HH and HL , 25 Aug 2026 - TP triggered @ 4626.05
+0.05 lots closed
+0 fees]"
+TFX-0011,2026-08-25,2026-08-25,LONG,XAUUSD,0.05,4649.94,4630.94,4630.99,4630.94,19.0,-18.949999999999818,-19.0,-1.0,-95.0,LOSS,INVALID_LONG_TP,"[25 Aug 2026 - Trade opened
+24 Aug 2026 - Trade opened
+after my htf view and ltf direction alignment using bullish sentiment of HH and HL , 25 Aug 2026 - SL triggered @ 4630.94
+0.05 lots closed
+0 fees]"
+TFX-0012,2026-08-25,2026-08-25,LONG,XAUUSD,0.1,4635.54,4624.54,4691.13,4691.13,11.0,55.590000000000146,55.590000000000146,5.053636363636363,555.9,WIN,OK,"[25 Aug 2026 - Trade opened
+24 Aug 2026 - Trade opened
+after my htf view and ltf direction alignment using bullish sentiment of HH and HL , 25 Aug 2026 - TP triggered @ 4691.13
+0.1 lots closed
+0 fees]"
+TFX-0013,2026-08-25,2026-08-25,SHORT,XAUUSD,0.1,4643.12,4630.09,4644.76,4630.09,-13.029999999999745,-1.6400000000003274,13.029999999999745,,130.3,WIN,INVALID_SHORT_SL|INVALID_SHORT_TP|EXIT_EQUALS_SL_BUT_PROFIT,"[25 Aug 2026 - Trade opened
+24 Aug 2026 - Trade opened
+after my htf view and ltf direction alignment using bullish sentiment of HH and HL , 25 Aug 2026 - SL triggered @ 4630.09
+0.1 lots closed
+0 fees]"
+TFX-0014,2026-08-25,2026-08-25,LONG,XAUUSD,0.1,4644.71,4634.87,4634.87,4634.87,9.840000000000146,-9.840000000000146,-9.840000000000146,-0.9999999999999851,-98.4,LOSS,INVALID_LONG_TP,"[25 Aug 2026 - Trade opened
+24 Aug 2026 - Trade opened
+after my htf view and ltf direction alignment using bullish sentiment of HH and HL , 25 Aug 2026 - SL triggered @ 4634.87
+0.1 lots closed
+0 fees]"
+TFX-0015,2026-08-26,,LONG,XAUUSD,0.2,4642.91,4632.91,4232.64,,10.0,-410.2699999999995,,0.0,0.0,OPEN,OPEN_TRADE|INVALID_LONG_TP,"[26 Aug 2026 - Trade opened
+There is HTF &LTF dis alignment that impacts my trading decision today nagetively ]"
+TFX-0016,2026-09-02,2026-09-02,LONG,XAUUSD,0.5,4305.36,4306.36,4319.02,4319.02,-1.0,13.660000000000764,13.660000000000764,,679.98,WIN,INVALID_LONG_SL,"[2 Sep 2026 - Trade opened
+HTF and LTF ERL and IRL liquidity taking before very brief trade 1:1+ due to economic unstablility , 2 Sep 2026 - TP triggered @ 4319.02
+0.5 lots closed
+3.02 fees
+2 Sep 2026 - Trade opened
+HTF and LTF ERL and IRL liquidity taking before very brief trade 1:1+ due to economic unstablility , 2 Sep 2026
+Post-trade Review: 1:1+ due to economic unstablility ]"
+TFX-0017,2026-09-02,2026-09-02,LONG,XAUUSD,1.0,4305.0,4305.13,4324.48,4324.48,-0.13000000000010914,19.479999999999563,19.479999999999563,,1948.0,WIN,INVALID_LONG_SL,"[2 Sep 2026 - Trade opened
+2 Sep 2026 - Trade opened
+HTF and LTF ERL and IRL liquidity taking before very brief trade 1:1+ due to economic unstablility , 2 Sep 2026 - TP triggered @ 4324.48
+1.0 lots closed
+0 fees, 2 Sep 2026
+Post-trade Review: ]"
