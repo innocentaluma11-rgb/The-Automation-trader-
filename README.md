@@ -1,21 +1,25 @@
-# The-Automation-trader-
-Automated trading research and testing pipeline for market data validation, strategy backtesting, risk analysis, and CI/CD workflows.
+from __future__ import annotations
 
-## XAU/USD visualization
+from tfx_agents import MarketSnapshot, TFXAgentEcosystem
 
-Install the visualization dependencies and generate a price/volume chart plus printed summary statistics:
 
-```bash
-pip install -r requirements.txt
-python scripts/visualize_xauusd.py
-```
+def test_ecosystem_runs_and_reports_complete_cycle():
+    market = MarketSnapshot(
+        symbol="XAU/USD",
+        price=2341.12,
+        volatility=0.014,
+        sentiment=0.68,
+        volume=126000,
+        news_bias=0.41,
+        strategy_bias=0.58,
+        score=0.71,
+    )
 
-The script reads `xauusd_test_data.csv` by default and writes `reports/xauusd_overview.png`. Use `--input` and `--output` to select another CSV or output location:
+    ecosystem = TFXAgentEcosystem(market_snapshot=market)
+    output = ecosystem.run_cycle()
 
-```bash
-python scripts/visualize_xauusd.py \
-  --input xauusd_test_data.csv \
-  --output reports/xauusd_overview.png
-```
-
-The chart contains the hourly close price with the high/low range and a color-coded volume panel (green for bullish candles, red for bearish candles). The console output includes the observed range, return, hourly volatility, volume, and candle counts.
+    assert output["summary"]["status"] == "complete"
+    assert output["summary"]["symbol"] == "XAU/USD"
+    assert len(output["results"]) == 11
+    assert output["context"].execution["action"] in {"buy", "sell", "hold"}
+    assert output["context"].strategy["signal"] in {"buy", "sell", "neutral"}
