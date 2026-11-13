@@ -1,4 +1,4 @@
-//@version=5
+//@version=6
 strategy("TFX T.E.S. SMC Signals", overlay=true, initial_capital=10000,
      default_qty_type=strategy.fixed, default_qty_value=1,
      process_orders_on_close=true,
