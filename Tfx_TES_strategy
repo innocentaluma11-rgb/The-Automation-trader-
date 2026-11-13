@@ -1,0 +1,196 @@
+//@version=5
+strategy("TFX T.E.S. SMC Signals", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.fixed, default_qty_value=1,
+     process_orders_on_close=true,
+     max_boxes_count=500, max_lines_count=500, max_labels_count=500)
+
+// ============ INPUTS ============
+swingLen  = input.int(5, "Swing pivot length (bars each side)", minval=2)
+sweepBars = input.int(20, "Liquidity sweep valid for (bars)", minval=3)
+armBars   = input.int(40, "Setup expires after (bars)", minval=5)
+dispMult  = input.float(1.0, "Displacement: body > ATR(14) x", minval=0.1, step=0.1)
+rrTarget  = input.float(2.0, "Target R:R", minval=1.0, step=0.5)
+riskPct   = input.float(1.0, "Risk % of equity per trade", minval=0.1, maxval=3.0, step=0.1)
+slBuffer  = input.float(0.0, "SL buffer (price units)", minval=0.0)
+showDash  = input.bool(true, "Show checklist dashboard")
+
+// ============ COLORS ============
+colBuy      = #00E676
+colSell     = #FF1744
+colSL       = #800020   // burgundy: long SL distance
+colTP       = #00C853   // green: TP
+colShortSL  = #00C853   // green: short SL distance (per your spec; change to colSL if you meant burgundy)
+colEntry    = #B0BEC5
+
+// ============ TIMEFRAME GATE (4H down to 1M) ============
+tfSec = timeframe.in_seconds(timeframe.period)
+tfOK  = tfSec >= 60 and tfSec <= 14400
+
+// ============ SWINGS ============
+ph = ta.pivothigh(high, swingLen, swingLen)
+pl = ta.pivotlow(low, swingLen, swingLen)
+var float lastSH = na
+var float lastSL = na
+if not na(ph)
+    lastSH := ph
+if not na(pl)
+    lastSL := pl
+
+// ============ STRUCTURE: BOS / CHoCH ============
+var int trend = 0
+upBreak = not na(lastSH) and ta.crossover(close, lastSH)
+dnBreak = not na(lastSL) and ta.crossunder(close, lastSL)
+chochUp = upBreak and trend == -1
+chochDn = dnBreak and trend == 1
+bosUp   = upBreak and trend == 1
+bosDn   = dnBreak and trend == -1
+
+if upBreak
+    trend := 1
+if dnBreak
+    trend := -1
+
+var string lastEvt = "None yet"
+if chochUp
+    lastEvt := "CHoCH bullish"
+else if chochDn
+    lastEvt := "CHoCH bearish"
+else if bosUp
+    lastEvt := "BOS bullish"
+else if bosDn
+    lastEvt := "BOS bearish"
+
+// ============ LIQUIDITY SWEEPS ============
+bullSweep = not na(lastSL) and low < lastSL and close > lastSL   // swept sell-side liquidity
+bearSweep = not na(lastSH) and high > lastSH and close < lastSH  // swept buy-side liquidity
+
+var int bullSweepBar = na
+var float bullSweepLow = na
+var int bearSweepBar = na
+var float bearSweepHigh = na
+if bullSweep
+    bullSweepBar := bar_index
+    bullSweepLow := low
+if bearSweep
+    bearSweepBar := bar_index
+    bearSweepHigh := high
+
+bullSweepRecent = not na(bullSweepBar) and bar_index - bullSweepBar <= sweepBars
+bearSweepRecent = not na(bearSweepBar) and bar_index - bearSweepBar <= sweepBars
+
+// ============ DISPLACEMENT ============
+atr14     = ta.atr(14)
+bullDisp  = close > open and math.abs(close - open) > atr14 * dispMult
+bearDisp  = close < open and math.abs(close - open) > atr14 * dispMult
+bullDispRecent = ta.barssince(bullDisp) <= 3
+bearDispRecent = ta.barssince(bearDisp) <= 3
+
+// ============ FAIR VALUE GAPS (3-candle) ============
+var float bullFvgBot = na
+var float bullFvgTop = na
+var int   bullFvgBar = na
+var float bearFvgBot = na
+var float bearFvgTop = na
+var int   bearFvgBar = na
+
+if low > high[2]
+    bullFvgBot := high[2]
+    bullFvgTop := low
+    bullFvgBar := bar_index
+if high < low[2]
+    bearFvgTop := low[2]
+    bearFvgBot := high
+    bearFvgBar := bar_index
+
+// ============ SETUP ARMING ============
+// Long: sell-side sweep -> bullish CHoCH -> displacement. Short: mirror.
+var int longArmBar  = na
+var int shortArmBar = na
+
+if chochUp and bullSweepRecent and bullDispRecent
+    longArmBar := bar_index
+if chochDn
+    longArmBar := na
+
+if chochDn and bearSweepRecent and bearDispRecent
+    shortArmBar := bar_index
+if chochUp
+    shortArmBar := na
+
+longArmed  = not na(longArmBar) and bar_index - longArmBar <= armBars
+shortArmed = not na(shortArmBar) and bar_index - shortArmBar <= armBars
+
+bullFvgFresh = not na(bullFvgBar) and not na(longArmBar) and bullFvgBar >= longArmBar - 3
+bearFvgFresh = not na(bearFvgBar) and not na(shortArmBar) and bearFvgBar >= shortArmBar - 3
+
+touchLong  = not na(bullFvgTop) and low <= bullFvgTop and high >= bullFvgBot
+touchShort = not na(bearFvgTop) and high >= bearFvgBot and low <= bearFvgTop
+
+// ============ TRADE LEVELS ============
+longE = (bullFvgTop + bullFvgBot) / 2
+longS = bullSweepLow - slBuffer
+longT = longE + rrTarget * (longE - longS)
+
+shortE = (bearFvgTop + bearFvgBot) / 2
+shortS = bearSweepHigh + slBuffer
+shortT = shortE - rrTarget * (shortS - shortE)
+
+// ============ SIGNALS (confirmed bars only, no repaint) ============
+longSig  = barstate.isconfirmed and longArmed and bullFvgFresh and touchLong and trend == 1 and strategy.position_size == 0 and longE > longS
+shortSig = barstate.isconfirmed and shortArmed and bearFvgFresh and touchShort and trend == -1 and strategy.position_size == 0 and shortS > shortE
+
+// ============ MINIMAL ICONS ============
+plotshape(longSig, "Buy", shape.triangleup, location.belowbar, colBuy, size=size.tiny)
+plotshape(shortSig, "Sell", shape.triangledown, location.abovebar, colSell, size=size.tiny)
+
+// ============ EXECUTION + TRADE MARKUP ============
+var int entryBar = na
+
+if longSig
+    q = (strategy.equity * riskPct / 100) / (longE - longS)
+    strategy.entry("Long", strategy.long, qty=q, limit=longE)
+    strategy.exit("Long Exit", "Long", stop=longS, limit=longT)
+    longArmBar := na
+    entryBar := bar_index
+    box.new(bar_index, longE, bar_index + 30, longS, border_color=colSL, bgcolor=color.new(colSL, 75), border_width=1)
+    box.new(bar_index, longT, bar_index + 30, longE, border_color=colTP, bgcolor=color.new(colTP, 85), border_width=1)
+    label.new(bar_index + 30, longE, "ENTRY " + str.tostring(longE, format.mintick), style=label.style_label_left, color=colEntry, textcolor=color.black, size=size.tiny)
+    label.new(bar_index + 30, longS, "SL " + str.tostring(longS, format.mintick), style=label.style_label_left, color=colSL, textcolor=color.white, size=size.tiny)
+    label.new(bar_index + 30, longT, "TP " + str.tostring(longT, format.mintick), style=label.style_label_left, color=colTP, textcolor=color.black, size=size.tiny)
+
+if shortSig
+    q = (strategy.equity * riskPct / 100) / (shortS - shortE)
+    strategy.entry("Short", strategy.short, qty=q, limit=shortE)
+    strategy.exit("Short Exit", "Short", stop=shortS, limit=shortT)
+    shortArmBar := na
+    entryBar := bar_index
+    box.new(bar_index, shortE, bar_index + 30, shortS, border_color=colShortSL, bgcolor=color.new(colShortSL, 75), border_width=1)
+    box.new(bar_index, shortT, bar_index + 30, shortE, border_color=colTP, bgcolor=color.new(colTP, 85), border_width=1)
+    label.new(bar_index + 30, shortE, "ENTRY " + str.tostring(shortE, format.mintick), style=label.style_label_left, color=colEntry, textcolor=color.black, size=size.tiny)
+    label.new(bar_index + 30, shortS, "SL " + str.tostring(shortS, format.mintick), style=label.style_label_left, color=colShortSL, textcolor=color.black, size=size.tiny)
+    label.new(bar_index + 30, shortT, "TP " + str.tostring(shortT, format.mintick), style=label.style_label_left, color=colTP, textcolor=color.black, size=size.tiny)
+
+// Cancel unfilled limit entries after 15 bars
+if not na(entryBar) and bar_index - entryBar > 15 and strategy.position_size == 0
+    strategy.cancel_all()
+    entryBar := na
+
+// ============ CHECKLIST DASHBOARD ============
+f_row(t, r, lbl, val, ok) =>
+    table.cell(t, 0, r, lbl, text_color=color.silver, text_size=size.small, bgcolor=color.new(color.black, 0))
+    table.cell(t, 1, r, val, text_color=ok ? colBuy : colSell, text_size=size.small, bgcolor=color.new(color.black, 0))
+
+var table tbl = table.new(position.top_right, 2, 10, bgcolor=color.new(color.black, 15), border_width=1, border_color=color.new(color.white, 70))
+
+if showDash and barstate.islast
+    table.cell(tbl, 0, 0, "TFX T.E.S. CHECKLIST", text_color=colEntry, text_size=size.small, bgcolor=color.new(color.black, 0))
+    table.cell(tbl, 1, 0, "", bgcolor=color.new(color.black, 0))
+    f_row(tbl, 1, "Timeframe 4H-1M", tfOK ? "PASS" : "FAIL", tfOK)
+    f_row(tbl, 2, "Structure trend", trend == 1 ? "BULLISH" : trend == -1 ? "BEARISH" : "NEUTRAL", trend != 0)
+    f_row(tbl, 3, "Last structure", lastEvt, chochUp or chochDn)
+    f_row(tbl, 4, "Sweep (recent)", bullSweepRecent ? "SELL-SIDE" : bearSweepRecent ? "BUY-SIDE" : "NONE", bullSweepRecent or bearSweepRecent)
+    f_row(tbl, 5, "Displacement", bullDispRecent ? "BULLISH" : bearDispRecent ? "BEARISH" : "NONE", bullDispRecent or bearDispRecent)
+    f_row(tbl, 6, "Setup", longArmed ? "LONG ARMED" : shortArmed ? "SHORT ARMED" : "WAITING", longArmed or shortArmed)
+    f_row(tbl, 7, "FVG retrace", touchLong ? "LONG TOUCH" : touchShort ? "SHORT TOUCH" : "NOT YET", touchLong or touchShort)
+    f_row(tbl, 8, "Target R:R / Risk", "1:" + str.tostring(rrTarget) + " / " + str.tostring(riskPct) + "%", true)
+    f_row(tbl, 9, "Position", strategy.position_size > 0 ? "LONG" : strategy.position_size < 0 ? "SHORT" : "FLAT", strategy.position_size == 0)
